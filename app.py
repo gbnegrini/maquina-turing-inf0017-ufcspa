@@ -1,6 +1,7 @@
-# Import required libraries
+# Imports
 import os
 from random import randint
+import pandas as pd
 
 import plotly.plotly as py
 from plotly.graph_objs import *
@@ -12,78 +13,98 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import dash_auth
+import dash_bootstrap_components as dbc
 
-USERNAME_PASSWORD_PAIRS = [['infobio', 'infobio']]
-
-# Setup the app
-# Make sure not to change this file name or the variable names below,
-# the template is configured to execute 'server' on 'app.py'
+# Servidor Flaks
 server = flask.Flask(__name__)
 server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
-app = dash.Dash(__name__, server=server)
+app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+# Autenticação
+USERNAME_PASSWORD_PAIRS = [['infobio', 'infobio']]
 auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
-app.layout = html.Div([
 
-    html.Div([html.P('Máquina de Turing - Entrada de dados'),
-              html.P('Grupo: Alice Nascimento, Guilherme Negrini, Júlia Martins, Sofia Faber')]),
-    html.Div([
-        dcc.Input(
-            id='add-simbolo',
-            placeholder='Símbolo',
-            value='',
-            style={'height': 4, 'padding': 10}
-        ),
-        html.Button('Adicionar símbolo', id='adding-rows-button', n_clicks=0)
-    ], style={'marginBottom': 20}),
+# Barra de navegação
+nav = html.Div(dbc.NavbarSimple(
+    dbc.NavItem(dbc.NavLink("Repositório",href="https://github.com/gbnegrini/maquina-turing-inf0017-ufcspa")),
+    brand="Máquina de Turing",
+    sticky="top",
+    color="secondary",
+    dark=True,
+    style={'font-size': 14}
+))
 
-    dash_table.DataTable(
-        id='input-dados',
-        columns=[{
-            'name': 'Estados',
-            'id': 'estados',
-            'deletable': True,
-            'renamable': True
-        }],
-        data=[
-            {'estados': 'q{}'.format(j)}
-            for j in range(0,5)
-        ],
-        style_table={'width':800},
-        style_cell={'textAlign': 'left'},
-        editable=True,
-        row_deletable=True
-    ),
+# Corpo da página
+body = dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                html.H3('Entrada de dados'),
+                dbc.Row([
+                    dbc.Input(
+                        id='add-simbolo',
+                        placeholder='Símbolo',
+                        value='',
+                        style={'height': 39, 'width': 100, 'margin-right': 15}
+                    ),
+                    dbc.Button('Adicionar símbolo', id='add-col-button', n_clicks=0)
+                ], style={'padding': 15, 'margin-bottom': 20}),
 
-    html.Button('Adicionar estado', id='editing-rows-button', n_clicks=0),
-])
+                dash_table.DataTable(
+                    id='input-dados',
+                    columns=[{
+                        'name': 'Estados',
+                        'id': 'estados',
+                        'deletable': True,
+                        'renamable': False
+                    }],
+                    data=[
+                    ],
+                    style_table={'width':'50%', 'margin-left':0},
+                    style_cell={'textAlign': 'left'},
+                    editable=True,
+                    row_deletable=True
+                ),
+                dbc.Button('Adicionar estado', id='add-rows-button', n_clicks=0, style={'margin-top': 20}),
+                dbc.Input(
+                    id='sentence',
+                    placeholder='Sentença',
+                    value='',
+                    style={'height': 39, 'width': '50%' ,'padding': 10, 'margin-top': 20, 'margin-bottom':20}
+                ),
+                html.Button('RUN', id='run-button')
+            ])
+        ])
+    ]
+)
 
+# Instancia a página
+app.layout = html.Div([nav, body])
 
+# Funções callback
 @app.callback(
     Output('input-dados', 'data'),
-    [Input('editing-rows-button', 'n_clicks')],
+    [Input('add-rows-button', 'n_clicks')],
     [State('input-dados', 'data'),
      State('input-dados', 'columns')])
 def add_row(n_clicks, rows, columns):
     if n_clicks > 0:
-        rows.append({c['id']: '' for c in columns})
+        rows.append({columns[0]['id']: 'q{}'.format(n_clicks-1)})
     return rows
 
 
 @app.callback(
     Output('input-dados', 'columns'),
-    [Input('adding-rows-button', 'n_clicks')],
+    [Input('add-col-button', 'n_clicks')],
     [State('add-simbolo', 'value'),
      State('input-dados', 'columns')])
 def update_columns(n_clicks, value, existing_columns):
     if n_clicks > 0:
         existing_columns.append({
             'id': value, 'name': value,
-            'renamable': True, 'deletable': True
+            'renamable': False, 'deletable': True
         })
     return existing_columns
 
-
-# Run the Dash app
+# Roda o app Dash
 if __name__ == '__main__':
     app.server.run(debug=True, threaded=True)

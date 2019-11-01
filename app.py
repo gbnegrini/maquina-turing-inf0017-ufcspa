@@ -71,7 +71,8 @@ body = dbc.Container([
                     value='',
                     style={'height': 39, 'width': '50%' ,'padding': 10, 'margin-top': 20, 'margin-bottom':20}
                 ),
-                html.Button('RUN', id='run-button')
+                html.Button('RUN', id='run-button', n_clicks=0),
+                html.Div(id='my-div')
             ])
         ])
     ]
@@ -104,6 +105,32 @@ def update_columns(n_clicks, value, existing_columns):
             'renamable': False, 'deletable': True
         })
     return existing_columns
+
+@app.callback(
+    Output('my-div', 'children'),
+    [Input('run-button', 'n_clicks')],
+    [State('sentence', 'value'),
+     State('input-dados', 'data')])
+def exibe(n_clicks, fita, dados):
+    if n_clicks > 0:
+        df = pd.DataFrame.from_dict(dados)
+        df.set_index('estados', inplace=True)
+        i = 0
+        s = df.index[0]
+        fita = list(fita)
+        while(s != df.index[-1]):
+            p = fita[i]
+            f = df[p][s]
+            f = str(f).replace(' ','').split(',')
+            s = f[0]
+            fita[i] = f[1]
+            if f[2] == 'D':
+                i = i+1
+            else:
+                i = i-1
+            print(fita)
+    return
+
 
 # Roda o app Dash
 if __name__ == '__main__':

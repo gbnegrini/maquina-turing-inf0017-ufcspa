@@ -2,6 +2,7 @@
 import os
 from random import randint
 import pandas as pd
+import time
 
 import plotly.plotly as py
 from plotly.graph_objs import *
@@ -44,6 +45,7 @@ body = dbc.Container([
                         id='add-simbolo',
                         placeholder='Símbolo',
                         value='',
+                        type = 'text',
                         style={'height': 39, 'width': 100, 'margin-right': 15}
                     ),
                     dbc.Button('Adicionar símbolo', id='add-col-button', n_clicks=0)
@@ -69,10 +71,15 @@ body = dbc.Container([
                     id='sentence',
                     placeholder='Sentença',
                     value='',
+                    type = 'text',
                     style={'height': 39, 'width': '50%' ,'padding': 10, 'margin-top': 20, 'margin-bottom':20}
                 ),
                 html.Button('RUN', id='run-button', n_clicks=0),
                 html.Div(id='my-div')
+            ]),
+
+            dbc.Col([
+                html.Div(id='fita-out', children=[])
             ])
         ])
     ]
@@ -94,7 +101,8 @@ def add_row(n_clicks, rows, columns):
 
 
 @app.callback(
-    Output('input-dados', 'columns'),
+    [Output('input-dados', 'columns'),
+    Output('add-simbolo', 'value')],
     [Input('add-col-button', 'n_clicks')],
     [State('add-simbolo', 'value'),
      State('input-dados', 'columns')])
@@ -104,10 +112,11 @@ def update_columns(n_clicks, value, existing_columns):
             'id': value, 'name': value,
             'renamable': False, 'deletable': True
         })
-    return existing_columns
+        value = ''
+    return existing_columns, value
 
 @app.callback(
-    Output('my-div', 'children'),
+    [Output('fita-out', 'children')],
     [Input('run-button', 'n_clicks')],
     [State('sentence', 'value'),
      State('input-dados', 'data')])
@@ -118,18 +127,24 @@ def exibe(n_clicks, fita, dados):
         i = 0
         s = df.index[0]
         fita = list(fita)
+        status = 'Aceita: '
         while(s != df.index[-1]):
-            p = fita[i]
-            f = df[p][s]
-            f = str(f).replace(' ','').split(',')
-            s = f[0]
-            fita[i] = f[1]
-            if f[2] == 'D':
-                i = i+1
-            else:
-                i = i-1
-            print(fita)
-    return
+            try:
+                p = fita[i]
+                f = df[p][s]
+                f = str(f).replace(' ','').split(',')
+                s = f[0]
+                fita[i] = f[1]
+                if f[2] == 'D':
+                    i = i+1
+                else:
+                    i = i-1
+            except IndexError:
+                status = 'Não aceita: '
+                break
+        fita = ''.join(fita)
+    return ['{}\n{}'.format(status,fita)]
+
 
 
 # Roda o app Dash

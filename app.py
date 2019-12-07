@@ -194,3 +194,4 @@ def exibe(n_clicks, fita, dados):
 # Roda o app Dash
 if __name__ == '__main__':
     app.server.run(debug=True, threaded=True)
+    app.title = 'Máquina de Turing'

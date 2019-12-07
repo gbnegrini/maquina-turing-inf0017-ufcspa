@@ -16,7 +16,7 @@ import dash_table
 import dash_auth
 import dash_bootstrap_components as dbc
 
-# Servidor Flaks
+# Servidor Flask
 server = flask.Flask(__name__)
 server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.FLATLY])
@@ -66,6 +66,7 @@ body = dbc.Container([
                     dbc.Button('Adicionar símbolo', id='add-col-button', n_clicks=0, color='primary', style={'width':'50%'})
                 ], style={'padding': 15, 'margin-bottom': 20}),
 
+                # Tabela de input dos dados
                 dash_table.DataTable(
                     id='input-dados',
                     columns=[{
@@ -107,6 +108,8 @@ body = dbc.Container([
 app.layout = html.Div([nav, body])
 
 # Funções callback
+
+# Adição de novo estado
 @app.callback(
     Output('input-dados', 'data'),
     [Input('add-rows-button', 'n_clicks')],
@@ -117,7 +120,7 @@ def add_row(n_clicks, rows, columns):
         rows.append({columns[0]['id']: 'q{}'.format(n_clicks-1)})
     return rows
 
-
+# Adição dos símbolos
 @app.callback(
     [Output('input-dados', 'columns'),
     Output('add-simbolo', 'value')],
@@ -133,6 +136,7 @@ def update_columns(n_clicks, value, existing_columns):
         value = ''
     return existing_columns, value
 
+# Lógica da Máquina de Turing
 @app.callback(
     [Output('resultado', 'children'),
      Output('fita-final', 'children'),

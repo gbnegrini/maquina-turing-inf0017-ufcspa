@@ -22,8 +22,8 @@ server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.FLATLY])
 
 # Autenticação
-USERNAME_PASSWORD_PAIRS = [['infobio', 'infobio']]
-auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+#USERNAME_PASSWORD_PAIRS = []
+#auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
 # Barra de navegação
 nav = html.Div(dbc.NavbarSimple(

@@ -20,7 +20,7 @@ A Máquina de Turing está disponível em: https://turing-inf0017.herokuapp.com/
  ```bash
  $ python app.py
  ```
-  - Acesse o endereço local na indicado no console.
+  - Acesse o endereço local indicado no console.
  
  ## Desenvolvido com
  
